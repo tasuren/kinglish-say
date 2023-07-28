@@ -1,0 +1,25 @@
+title: Kinglish
+description: |
+  A tool to quickly know the pronunciation of the word, the de.
+  Here are the details (needless to say): https://github.com/tasuren/kinglish/
+ui:
+  tasktray:
+    info: Information
+    setting_file: Open configuration file
+    quit: Quit
+  error:
+    unexpected:
+      title: Unexpected error
+      description: |
+        I got a mysterious error...
+        I want to fix a bug... I want to fix a bug...
+        I want to fix a bug!! (Gkkk!)
+        Error code: %{error_code}
+    command_failed:
+      title: Talking error
+      description: Failed to execute the speaking command.
+misc:
+  parse_error: |
+    The configuration file is not appropriate. Of course it is!
+    File path: %{path}
+    Error code: %{error_code}

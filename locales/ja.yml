@@ -1,0 +1,27 @@
+title: キンglish
+description: |
+  迅速に発音を知るための道具、ゥ。
+  詳細はこちらにある（言うまでも無い）：https://github.com/tasuren/kinglish/
+ui:
+  tasktray:
+    info: 情報
+    setting_file: 設定ファイルを開く
+    quit: 終了
+  error:
+    unexpected:
+      title: 予期せぬエラー
+      description: |
+        謎のエラーが発生してしまいました...
+        バグ修正したい...バグ修正したい...
+        バグ修正したい！！！！（グキィッ！）
+        エラーコード：%{error_code}
+    command_failed:
+      title: お喋りエラー
+      description: |
+        喋るコマンドの実行に失敗しました。
+        イタズラの域をはるかに超えている。
+misc:
+  parse_error: |
+    設定ファイルが適切ではない。そうに決まってる！
+    ファイルパス：%{path}
+    エラーコード：%{error_code}
