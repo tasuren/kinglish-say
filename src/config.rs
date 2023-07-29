@@ -1,4 +1,8 @@
-use std::fs::{read_to_string, write, create_dir};
+use std::fs::{read_to_string, write};
+#[cfg(target_os="windows")]
+use std::fs::create_dir_all;
+#[cfg(not(target_os="windows"))]
+use std::fs::create_dir;
 
 use rfd::MessageDialog;
 use rust_i18n::t;
@@ -31,10 +35,13 @@ impl Config {
         let base = ProjectDirs::from("jp", "tasuren", "kinglish").unwrap();
 
         if !base.config_local_dir().exists() {
+            #[cfg(target_os="windows")]
+            create_dir_all(base.config_local_dir()).unwrap();
+            #[cfg(not(target_os="windows"))]
             create_dir(base.config_local_dir()).unwrap();
         };
 
-        let path = base.config_local_dir().join("main.json");
+        let path = base.config_local_dir().join("main.toml");
 
         if path.exists() {
             let mut c: Self = toml::from_str(
