@@ -3,7 +3,7 @@ description: |
   迅速に発音を知るための道具、ゥ。
   詳細はこちらにある（言うまでも無い）：https://github.com/tasuren/kinglish/
 ui:
-  tasktray:
+  system_tray:
     info: 情報
     setting_file: 設定ファイルを開く
     quit: 終了

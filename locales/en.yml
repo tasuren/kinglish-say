@@ -3,7 +3,7 @@ description: |
   A tool to quickly know the pronunciation of the word, the de.
   Here are the details (needless to say): https://github.com/tasuren/kinglish/
 ui:
-  tasktray:
+  system_tray:
     info: Information
     setting_file: Open configuration file
     quit: Quit

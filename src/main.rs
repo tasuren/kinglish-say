@@ -5,7 +5,14 @@ use std::{
     process::{Command, Child}, cell::OnceCell
 };
 
-use tray_item::{TrayItem, IconSource};
+use tao::{
+    system_tray::SystemTrayBuilder, window::Icon,
+    menu::{ContextMenu, MenuItem, MenuItemAttributes},
+    event_loop::{EventLoop, ControlFlow},
+    event::Event, platform::macos::{ActivationPolicy, EventLoopWindowTargetExtMacOS}
+};
+#[cfg(target_os="macos")]
+use objc2::{msg_send, class, runtime::Object};
 use rfd::AsyncMessageDialog;
 
 use global_hotkey::{
@@ -39,7 +46,7 @@ struct Core {
 }
 
 
-#[inline(always)]
+#[inline]
 fn say(config: Arc<Config>, sender: SyncSender<Child>, text: String) {
     sender.send(
         Command::new(&config.command.program)
@@ -52,7 +59,7 @@ fn say(config: Arc<Config>, sender: SyncSender<Child>, text: String) {
 }
 
 
-#[inline(always)]
+#[inline]
 fn spawn_waiter(rx: Receiver<Child>) -> JoinHandle<()> {
     spawn(move || loop {
         if let Ok(child) = rx.recv() {
@@ -122,50 +129,87 @@ impl Core {
 }
 
 
+#[inline]
+fn load_icon() -> Icon {
+    let (width, height) = {
+        let raw = include_bytes!("../dist/system_tray_icon/dimensions")
+            .split_at(std::mem::size_of::<u32>());
+        (
+            u32::from_be_bytes(raw.0.try_into().unwrap()),
+            u32::from_be_bytes(raw.1.try_into().unwrap())
+        )
+    };
+    tao::system_tray::Icon::from_rgba(
+        (*include_bytes!("../dist/system_tray_icon/body")).to_vec(),
+        width, height
+    ).expect("アイコンを開くのに失敗しました。")
+}
+
+
 fn main() {
     let core = Arc::new(Core::new());
-
-    let mut tray = TrayItem::new(&t!("title"), IconSource::Resource(""))
-        .expect("常駐アイコンの初期化に失敗しました。");
-
-    tray.add_menu_item(&t!("ui.tasktray.info"), || {
-        let _ = AsyncMessageDialog::new()
-            .set_title(&format!(
-                "{} v{}", t!("title"),
-                env!("CARGO_PKG_VERSION")
-            ))
-            .set_description(&t!("description"))
-            .show();
-    }).unwrap();
-    tray.add_menu_item(
-        &t!("ui.tasktray.setting_file"),
-        {
-            let config = Arc::clone(&core.config);
-            move || opener::open(config.path.as_os_str()).unwrap()
-        }
-    ).unwrap();
-
-    let inner = tray.inner_mut();
+    let event_loop = EventLoop::new();
 
     #[cfg(target_os="macos")]
     {
-        inner.add_quit_item(&t!("ui.tasktray.quit"));
-        inner.display();
-    }
-    #[cfg(target_os="windows")]
-    {
-        let (tx, rx) = channel();
-        tray.add_menu_item(
-            &t!("ui.tasktray.quit"),
-            move || tx.send(Message::Quit).unwrap()
-        );
+        // NOTE: macOSではなぜかこうしないと起動しない。
+        // 詳細はここで説明：https://github.com/tauri-apps/tao/issues/774
+        unsafe { let _: *const Object = msg_send![
+            class!(NSApplication), sharedApplication
+        ]; };
+    };
 
-        loop {
-            match rx.recv().unwrap() {
-                Message::Quit => break
-            }
-        }
-    }
-    #[cfg(target_os="linux")]
-    compile_error!("Linuxはまだ対応していません。");
+    let mut menu = ContextMenu::new();
+
+    let setting_file_item_id = menu.add_item(
+        MenuItemAttributes::new(&t!("ui.system_tray.setting_file"))
+    ).id();
+    menu.add_native_item(MenuItem::Separator);
+    let information_item_id = menu.add_item(
+        MenuItemAttributes::new(&t!("ui.system_tray.info"))
+    ).id();
+    menu.add_native_item(MenuItem::Quit).unwrap()
+        .set_title(&t!("ui.system_tray.quit"));
+
+
+    let _tray = SystemTrayBuilder::new(load_icon(), Some(menu))
+        .build(&event_loop);
+
+
+    #[cfg(target_os="macos")]
+    let mut set = false;
+
+    event_loop.run(move |event, event_loop, control_flow| {
+        *control_flow = ControlFlow::Wait;
+
+        #[cfg(target_os="macos")]
+        if !set {
+            // なぜかランタイムにActivationPolicyを変えなければクラッシュする。
+            // これは恐らくイベントループの`run_return`が実行されるまで内部のデリゲートがnilとなってしまうからだろう。
+            // 詳細はこちらで問い合わせ中：https://github.com/tauri-apps/tao/issues/774
+            // それが解決次第、ランタイムではなくアプリケーション起動前にこれを設定するように変える。
+            event_loop.set_activation_policy_at_runtime(ActivationPolicy::Prohibited);
+            set = true;
+        };
+
+        match event {
+            Event::MenuEvent { menu_id, .. } => match menu_id {
+                _ if menu_id == setting_file_item_id => {
+                    let config = Arc::clone(&core.config);
+                    opener::open(config.path.as_os_str()).unwrap();
+                },
+                _ if menu_id == information_item_id => {
+                    let _ = AsyncMessageDialog::new()
+                        .set_title(&format!(
+                            "{} v{}", t!("title"),
+                            env!("CARGO_PKG_VERSION")
+                        ))
+                        .set_description(&t!("description"))
+                        .show();
+                },
+                _ => ()
+            },
+            _ => ()
+        };
+    });
 }
