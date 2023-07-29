@@ -2,7 +2,8 @@
 name = "kinglish"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.70.0"
+rust-version = "1.71.0"
+build = "build.rs"
 authors = ["Takagi Tasuku <tasuren@outlook.jp>"]
 description = "迅速に喋り方を知るための道具、ゥ。"
 readme = "README.md"
@@ -25,3 +26,11 @@ opener = "0.6.1"
 global-hotkey = "0.2.3"
 smallvec = { version = "1.11.0", features = ["serde"] }
 arboard = "3.2.0"
+
+[target.'cfg(target_os="windows")'.build-dependencies]
+reqwest = { version = "0.11.18", features = ["blocking", "json"] }
+tauri-winres = "0.1"
+
+[package.metadata.winres]
+OriginalFilename = "kinglish_say.exe"
+LegalCopyright = "(c) Takagi Tasuku 2023"
