@@ -2,7 +2,7 @@ use std::{fs::write, path::Path};
 
 #[cfg(target_os="windows")]
 use {
-    std::{fs::File, path::Path},
+    std::fs::File,
     tauri_winres::WindowsResource,
     reqwest::blocking::get
 };
