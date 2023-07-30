@@ -9,10 +9,13 @@ use tao::{
     system_tray::SystemTrayBuilder, window::Icon,
     menu::{ContextMenu, MenuItem, MenuItemAttributes},
     event_loop::{EventLoop, ControlFlow},
-    event::Event, platform::macos::{ActivationPolicy, EventLoopWindowTargetExtMacOS}
+    event::Event
 };
 #[cfg(target_os="macos")]
-use objc2::{msg_send, class, runtime::Object};
+use {
+    tao::platform::macos::{ActivationPolicy, EventLoopWindowTargetExtMacOS},
+    objc2::{msg_send, class, runtime::Object}
+};
 use rfd::AsyncMessageDialog;
 
 use global_hotkey::{
@@ -29,12 +32,6 @@ use config::Config;
 
 
 i18n!("locales", fallback="ja");
-
-
-#[cfg(target_os="windows")]
-enum Message {
-    Quit
-}
 
 
 struct Core {
