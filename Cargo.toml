@@ -8,8 +8,8 @@ authors = ["Takagi Tasuku <tasuren@outlook.jp>"]
 description = "迅速に喋り方を知るための道具、ゥ。"
 readme = "README.md"
 license-file = "LICENSE"
-homepage = "https://tasuren.jp/works/kinglish/"
-repository = "https://github.com/tasuren/kinglish"
+homepage = "https://tasuren.jp/works/kinglish-say/"
+repository = "https://github.com/tasuren/kinglish-say"
 keywords = ["application", "speek", "pronunciation"]
 categories = ["accessibility"]
 
