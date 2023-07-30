@@ -165,8 +165,13 @@ fn main() {
     let information_item_id = menu.add_item(
         MenuItemAttributes::new(&t!("ui.system_tray.info"))
     ).id();
+    #[cfg(target_os="macos")]
     menu.add_native_item(MenuItem::Quit).unwrap()
         .set_title(&t!("ui.system_tray.quit"));
+    #[cfg(target_os="windows")]
+    let quit_id = menu.add_item(
+        MenuItemAttributes::new(&t!("ui.system_tray.quit"))
+    ).id();
 
 
     let _tray = SystemTrayBuilder::new(load_icon(), Some(menu))
@@ -204,7 +209,10 @@ fn main() {
                         .set_description(&t!("description"))
                         .show();
                 },
-                _ => ()
+                _id => {
+                    #[cfg(target_os="windows")]
+                    if _id == quit_id { *control_flow = ControlFlow::Exit };
+                }
             },
             _ => ()
         };
