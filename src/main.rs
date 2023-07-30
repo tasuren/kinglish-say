@@ -1,9 +1,13 @@
+#![cfg_attr(not(test), windows_subsystem="windows")]
+
 use std::{
     thread::{spawn, JoinHandle}, sync::{
         Arc, Mutex, mpsc::{SyncSender, Receiver, sync_channel}
     },
     process::{Command, Child}, cell::OnceCell
 };
+#[cfg(target_os="windows")]
+use std::os::windows::process::CommandExt;
 
 use tao::{
     system_tray::SystemTrayBuilder, window::Icon,
@@ -43,16 +47,23 @@ struct Core {
 }
 
 
+#[cfg(target_os="windows")]
+const DETACHED_PROCESS: u32 = 0x00000008;
+
+
 #[inline]
 fn say(config: Arc<Config>, sender: SyncSender<Child>, text: String) {
-    sender.send(
-        Command::new(&config.command.program)
-            .args(config.command.args.iter().map(
-                |arg| if arg.contains("{text}") {
-                    arg.replace("{text}", &text)
-                } else { arg.clone() }
-            )).spawn().unwrap()
-    ).unwrap();
+    sender.send({
+        let mut cmd = Command::new(&config.command.program);
+        cmd.args(config.command.args.iter().map(
+            |arg| if arg.contains("{text}") {
+                arg.replace("{text}", &text)
+            } else { arg.clone() }
+        ));
+        #[cfg(target_os="windows")]
+        cmd.creation_flags(DETACHED_PROCESS);
+        cmd
+    }.spawn().unwrap()).unwrap();
 }
 
 
