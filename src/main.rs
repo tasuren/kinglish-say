@@ -181,7 +181,7 @@ fn main() {
     #[cfg(target_os="macos")]
     let mut set = false;
 
-    event_loop.run(move |event, event_loop, control_flow| {
+    event_loop.run(move |event, _event_loop, control_flow| {
         *control_flow = ControlFlow::Wait;
 
         #[cfg(target_os="macos")]
@@ -190,7 +190,7 @@ fn main() {
             // これは恐らくイベントループの`run_return`が実行されるまで内部のデリゲートがnilとなってしまうからだろう。
             // 詳細はこちらで問い合わせ中：https://github.com/tauri-apps/tao/issues/774
             // それが解決次第、ランタイムではなくアプリケーション起動前にこれを設定するように変える。
-            event_loop.set_activation_policy_at_runtime(ActivationPolicy::Prohibited);
+            _event_loop.set_activation_policy_at_runtime(ActivationPolicy::Prohibited);
             set = true;
         };
 
