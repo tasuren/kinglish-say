@@ -19,7 +19,7 @@ fn main() {
             if cfg!(target_os="macos") {
                 include_bytes!("icon/mac/status_item.png")
             } else {
-                include_bytes!("icon/other/main.ico")
+                include_bytes!("icon/other/main.png")
             }
         )
             .expect("Failed to open icon path")
