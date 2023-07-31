@@ -153,7 +153,10 @@ fn load_icon() -> Icon {
 
 fn main() {
     let core = Arc::new(Core::new());
+    #[cfg(target_os="macos")]
     let mut event_loop = EventLoop::new();
+    #[cfg(not(target_os="macos"))]
+    let event_loop = EventLoop::new();
 
     #[cfg(target_os="macos")]
     event_loop.set_activation_policy(ActivationPolicy::Accessory);
