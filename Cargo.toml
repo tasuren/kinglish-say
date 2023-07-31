@@ -16,10 +16,10 @@ categories = ["accessibility"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tao = { version = "0.21.0", features = ["tray"] }
+tao = { version = "0.21.1", features = ["tray"] }
 rfd = "0.11.4"
 rust-i18n = "2.1.0"
-serde = { version = "1.0.178", features = ["derive"] }
+serde = { version = "1.0.179", features = ["derive"] }
 directories = "5.0.1"
 toml = "0.7.6"
 opener = "0.6.1"
