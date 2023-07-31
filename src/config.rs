@@ -32,7 +32,7 @@ pub struct Config {
 
 impl Config {
     pub fn new() -> Self {
-        let base = ProjectDirs::from("jp", "tasuren", "kinglish").unwrap();
+        let base = ProjectDirs::from("jp", "tasuren", "kinglish-say").unwrap();
 
         if !base.config_local_dir().exists() {
             #[cfg(target_os="windows")]

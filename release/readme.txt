@@ -1,5 +1,5 @@
 【ソフト名】キンglish セイ
-【バージョン】0.1.0
+【バージョン】0.1.1
 【作者】髙木 祐来
 【動作環境】|
 　Windows: Windows10 (x86_64)
@@ -17,6 +17,7 @@
 Windowsの場合`kinglish_say.exe`でmacOSの場合`kinglish-say.app`がアプリ本体です。それを開くことで起動できます。
 読み上げ方法ですが、それは文字列をコピーした後で三秒以内にCtrl + Sを押せばできます。
 起動した場合、Windowsの場合はタスクトレイでmacOSの場合ステータスバーから終了または情報の表示そして設定ファイルを開くといったことが可能です。
+設定ファイルに関しては、設定変更後にソフトの再起動をしてください。
 
 ・謝辞
 こちらに記載されています：https://github.com/tasuren/kinglish-say/blob/main/acknowledgements/README.md
