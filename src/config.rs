@@ -78,7 +78,7 @@ impl Config {
                         program: "wsay".to_string(),
                         args: smallvec![
                             "-v".to_string(),
-                            "1".to_string(),
+                            "2".to_string(),
                             "{text}".to_string()
                         ]
                     }
