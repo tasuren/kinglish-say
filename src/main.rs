@@ -16,10 +16,7 @@ use tao::{
     event::Event
 };
 #[cfg(target_os="macos")]
-use {
-    tao::platform::macos::{ActivationPolicy, EventLoopWindowTargetExtMacOS},
-    objc2::{msg_send, class, runtime::Object}
-};
+use tao::platform::macos::{ActivationPolicy, EventLoopExtMacOS};
 use rfd::AsyncMessageDialog;
 
 use global_hotkey::{
@@ -156,16 +153,10 @@ fn load_icon() -> Icon {
 
 fn main() {
     let core = Arc::new(Core::new());
-    let event_loop = EventLoop::new();
+    let mut event_loop = EventLoop::new();
 
     #[cfg(target_os="macos")]
-    {
-        // NOTE: macOSではなぜかこうしないと起動しない。
-        // 詳細はここで説明：https://github.com/tauri-apps/tao/issues/774
-        unsafe { let _: *const Object = msg_send![
-            class!(NSApplication), sharedApplication
-        ]; };
-    };
+    event_loop.set_activation_policy(ActivationPolicy::Accessory);
 
     let mut menu = ContextMenu::new();
 
@@ -189,21 +180,8 @@ fn main() {
         .build(&event_loop);
 
 
-    #[cfg(target_os="macos")]
-    let mut set = false;
-
     event_loop.run(move |event, _event_loop, control_flow| {
         *control_flow = ControlFlow::Wait;
-
-        #[cfg(target_os="macos")]
-        if !set {
-            // なぜかランタイムにActivationPolicyを変えなければクラッシュする。
-            // これは恐らくイベントループの`run_return`が実行されるまで内部のデリゲートがnilとなってしまうからだろう。
-            // 詳細はこちらで問い合わせ中：https://github.com/tauri-apps/tao/issues/774
-            // それが解決次第、ランタイムではなくアプリケーション起動前にこれを設定するように変える。
-            _event_loop.set_activation_policy_at_runtime(ActivationPolicy::Prohibited);
-            set = true;
-        };
 
         match event {
             Event::MenuEvent { menu_id, .. } => match menu_id {
