@@ -2,9 +2,9 @@
 
 use std::{
     thread::{spawn, JoinHandle}, sync::{
-        Arc, Mutex, mpsc::{SyncSender, Receiver, sync_channel}
+        Arc, Mutex, mpsc::{SyncSender, Receiver, sync_channel}, OnceLock
     },
-    process::{Command, Child}, cell::OnceCell
+    process::{Command, Child}, cell::OnceCell, time::{SystemTime, Duration}
 };
 #[cfg(target_os="windows")]
 use std::os::windows::process::CommandExt;
@@ -40,6 +40,7 @@ struct Core {
     hotkey_manager: OnceCell<GlobalHotKeyManager>,
     clipboard: Arc<Mutex<Clipboard>>,
     child_sender: SyncSender<Child>,
+    before: Arc<Mutex<OnceLock<SystemTime>>>,
     _waiter: JoinHandle<()>
 }
 
@@ -97,13 +98,16 @@ impl Core {
             config: Arc::new(config),
             hotkey_manager: OnceCell::new(),
             clipboard: Arc::new(Mutex::new(Clipboard::new().unwrap())),
-            child_sender: tx, _waiter: spawn_waiter(rx)
+            child_sender: tx, _waiter: spawn_waiter(rx),
+            before: Arc::new(Mutex::new(OnceLock::new()))
         };
 
         c.hotkey_manager.set(c.setup_hotkey()).ok().unwrap();
 
         c
     }
+
+    const THREE_SECONDS_DURATION: Duration = Duration::new(3, 0);
 
     /// ホットキーの設定をします。
     #[inline(always)]
@@ -118,14 +122,26 @@ impl Core {
             let config = Arc::clone(&self.config);
             let clipboard = Arc::clone(&self.clipboard);
             let sender = self.child_sender.clone();
+            let before = Arc::clone(&self.before);
 
             Some(move |_| {
                 // もし二個目のホットキーが三秒以内に押されたのなら
-                say(
-                    Arc::clone(&config), sender.clone(),
-                    clipboard.lock().unwrap()
-                        .get_text().unwrap()
-                );
+                let mut before = before.lock().unwrap();
+
+                if let Some(t) = 
+                    if let Some(t) = before.take()
+                        { t.elapsed().ok() } else { None }
+                {
+                    if t < Self::THREE_SECONDS_DURATION {
+                        say(
+                            Arc::clone(&config), sender.clone(),
+                            clipboard.lock().unwrap()
+                                .get_text().unwrap()
+                        );
+                        return;
+                    };
+                };
+                before.set(SystemTime::now()).unwrap();
             })
         });
 
