@@ -24,7 +24,7 @@ directories = "5.0.1"
 toml = "0.8.2"
 opener = "0.6.1"
 global-hotkey = "0.4.0"
-smallvec = { version = "1.11.1", features = ["serde"] }
+smallvec = { version = "1.11.2", features = ["serde"] }
 arboard = "3.2.1"
 
 [target.'cfg(target_os="macos")'.dependencies]
