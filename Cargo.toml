@@ -23,7 +23,7 @@ serde = { version = "1.0.192", features = ["derive"] }
 directories = "5.0.1"
 toml = "0.8.2"
 opener = "0.6.1"
-global-hotkey = "0.4.0"
+global-hotkey = "0.4.1"
 smallvec = { version = "1.11.2", features = ["serde"] }
 arboard = "3.2.1"
 
